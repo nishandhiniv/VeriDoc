@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     DATA_DIR=/app/data \
     PORT=10000 \
+    OMP_THREAD_LIMIT=1 \
     PATH=/opt/venv/bin:$PATH
 
 RUN apt-get update \

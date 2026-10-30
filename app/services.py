@@ -6,6 +6,7 @@ from pathlib import Path
 from flask import current_app
 from PIL import Image
 
+from engine import MAX_PIXELS
 from engine.validate import validate_application
 
 from .models import Application, CheckResult, EnteredMark, db, utcnow
@@ -29,9 +30,12 @@ def inspect_upload(data, settings):
         raise UploadError("PDF files can't be checked yet. Upload a photo or scan as JPG or PNG.")
     try:
         img = Image.open(io.BytesIO(data))
+        too_big = img.width * img.height > MAX_PIXELS
         img.verify()
-    except Exception:  # noqa: BLE001
-        raise UploadError("This file isn't an image. Upload a JPG or PNG.") from None
+    except Exception:  # noqa: BLE001 - includes PIL's own decompression-bomb error
+        raise UploadError("This file isn't an image, or is far too large to process. Upload a JPG or PNG.") from None
+    if too_big:
+        raise UploadError("This image has too many pixels to process. Upload a smaller photo or scan.")
     return img.format
 
 

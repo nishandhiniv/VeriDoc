@@ -102,7 +102,7 @@ def test_us02_ac1_photo_breaking_rules_is_still_accepted(at_uploads):
 def test_us02_ac2_non_image_renamed_jpg_rejected_by_content(at_uploads):
     resp = upload(at_uploads, b"just some text, honestly", sample_photo(), sheet_name="sheet.jpg")
     assert resp.status_code == 400
-    assert b"This file isn&#39;t an image. Upload a JPG or PNG." in resp.data
+    assert b"This file isn&#39;t an image" in resp.data
 
 
 def test_us02_pdf_gets_clear_message(at_uploads):
@@ -181,3 +181,12 @@ def test_us03_ac2_rules_are_read_from_settings(app, client):
         save_setting("photo_min_height", 450)
     html = client.get("/").get_data(as_text=True)
     assert "350 × 450" in html and "300 × 400" not in html
+
+
+def test_us02_decompression_bomb_rejected(at_uploads):
+    from PIL import Image
+    buf = io.BytesIO()
+    Image.new("1", (8000, 8000)).save(buf, "PNG")  # 64 million pixels, tiny file
+    resp = upload(at_uploads, buf.getvalue(), sample_photo())
+    assert resp.status_code == 400
+    assert b"too many pixels" in resp.data or b"far too large" in resp.data

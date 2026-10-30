@@ -1,0 +1,23 @@
+# Render Blueprint: one free Docker web service (Phase 8).
+# Render → New → Blueprint → pick this repository. Fill in the two demo passwords when asked.
+services:
+  - type: web
+    name: veridoc
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "1"
+      - key: DEMO_REVIEWER_EMAIL
+        value: reviewer@veridoc.test
+      - key: DEMO_ADMIN_EMAIL
+        value: admin@veridoc.test
+      - key: DEMO_REVIEWER_PASSWORD
+        sync: false
+      - key: DEMO_ADMIN_PASSWORD
+        sync: false
