@@ -159,12 +159,16 @@ def parse_lines(lines, template, img, header_x, header_line):
             continue
         tokens = [(clean_token(w["text"]), w) for w in ws]
         tokens = [(t, w) for t, w in tokens if t]
-        numeric = [(t, w) for t, w in tokens if NUMBER_RE.match(t)]
-        words = [t for t, w in tokens if not NUMBER_RE.match(t)]
         if template["has_subject_code"] and tokens and NUMBER_RE.match(tokens[0][0]):
-            numeric = numeric[1:]  # leading subject code
-        if template["has_subject_code"] and words and re.fullmatch(r"[A-E][12]?", words[-1]):
-            words = words[:-1]      # trailing grade
+            tokens = tokens[1:]  # leading subject code
+        numeric = [(t, w) for t, w in tokens if NUMBER_RE.match(t)]
+        # The subject name is the words before the first number. Anything after the
+        # marks (grades such as "C1", often misread as "Cl") is ignored.
+        words = []
+        for t, _ in tokens:
+            if NUMBER_RE.match(t):
+                break
+            words.append(t)
         name_text = " ".join(words).upper()
         if not name_text or not numeric:
             continue
