@@ -26,6 +26,8 @@ class Config:
     # Seed in the background so the server answers immediately on slow hosts.
     SEED_DEMO_ASYNC = os.environ.get("SEED_DEMO_ASYNC", "1") == "1"
     SEED_EVALUATION = os.environ.get("SEED_EVALUATION", "1") == "1"
+    # Data prepared at image build time (app/prebuild.py), copied in on a fresh disk.
+    PREBUILT_DATA_DIR = Path(os.environ["PREBUILT_DATA_DIR"]) if os.environ.get("PREBUILT_DATA_DIR") else None
 
 
 class TestConfig(Config):
@@ -34,3 +36,4 @@ class TestConfig(Config):
     SEED_DEMO = False
     SEED_DEMO_ASYNC = False
     SEED_EVALUATION = False
+    PREBUILT_DATA_DIR = None

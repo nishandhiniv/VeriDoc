@@ -91,7 +91,10 @@ def seed_demo(app):
         from .evaluation_runner import start_evaluation
         from .models import EvaluationRun
         with app.app_context():
-            if not EvaluationRun.query.filter_by(status="done").first():
+            # Only one automatic attempt: if a startup run was ever tried (even one that was
+            # interrupted), don't retry on every worker restart. Admins can press Run.
+            if not EvaluationRun.query.filter((EvaluationRun.status == "done")
+                                              | (EvaluationRun.started_by == "startup")).first():
                 start_evaluation(app, "startup", background=False)
 
 

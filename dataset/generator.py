@@ -47,6 +47,17 @@ def cbse_grade(total):
     return "E"
 
 
+def add_noise(arr, np_rng, sd, chunk_rows=256):
+    """Gaussian noise added a band of rows at a time, in float32, so large photos fit in
+    the free hosting plan's 512 MB of memory."""
+    out = np.empty_like(arr)
+    for y in range(0, arr.shape[0], chunk_rows):
+        band = arr[y:y + chunk_rows].astype(np.float32)
+        band += np_rng.standard_normal(band.shape, dtype=np.float32) * np.float32(sd)
+        out[y:y + chunk_rows] = np.clip(band, 0, 255)
+    return out
+
+
 # ---------------------------------------------------------------- students
 
 def make_student(template, rng, index):
@@ -169,10 +180,8 @@ def degrade(img, rng):
     out = img.rotate(angle, resample=Image.BICUBIC, expand=True, fillcolor=(235, 233, 225))
     out = out.filter(ImageFilter.GaussianBlur(rng.uniform(0.6, 1.3)))
     out = ImageEnhance.Brightness(out).enhance(rng.uniform(0.62, 0.8))
-    arr = np.asarray(out).astype(np.float32)
     np_rng = np.random.default_rng(rng.randint(0, 2 ** 31))
-    arr += np_rng.normal(0, rng.uniform(6, 12), arr.shape)
-    out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+    out = Image.fromarray(add_noise(np.asarray(out), np_rng, rng.uniform(6, 12)))
     buf = io.BytesIO()
     out.save(buf, "JPEG", quality=rng.randint(45, 65))
     return Image.open(io.BytesIO(buf.getvalue())), {"angle": round(angle, 2)}
@@ -197,9 +206,7 @@ def draw_portrait(w, h, rng, brightness=1.0, blur=0.0):
     for ex in (-0.08, 0.08):
         d.ellipse([cx + w * ex - w * 0.025, h * 0.38, cx + w * ex + w * 0.025, h * 0.41], fill=(20, 20, 20))
     d.line([(cx - w * 0.06, h * 0.52), (cx + w * 0.06, h * 0.52)], fill=(110, 50, 50), width=max(2, w // 120))
-    arr = np.asarray(img).astype(np.float32)
-    arr += np_rng.normal(0, 9, arr.shape)  # sensor noise gives realistic detail and file size
-    img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+    img = Image.fromarray(add_noise(np.asarray(img), np_rng, 9))  # sensor noise: realistic detail and size
     if blur:
         img = img.filter(ImageFilter.GaussianBlur(blur))
     if brightness != 1.0:

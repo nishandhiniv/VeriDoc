@@ -126,3 +126,39 @@ def test_ac1_demo_applications_seeded_through_real_engine_once(tmp_path, monkeyp
     create_app(cfg)  # restart
     with app.app_context():
         assert Application.query.filter_by(is_demo=True).count() == len(demo)
+
+
+def test_startup_evaluation_is_not_retried_after_an_interrupted_attempt(tmp_path, monkeypatch):
+    """Regression: an out-of-memory kill during the startup run caused an endless restart loop."""
+    from app import evaluation_runner
+    from app.models import EvaluationRun, db
+    calls = []
+    monkeypatch.setattr(evaluation_runner, "_execute", lambda app, run_id: calls.append(run_id))
+    cfg = make_config(tmp_path, SEED_DEMO=True, SEED_DEMO_ASYNC=False, SEED_EVALUATION=True)
+    monkeypatch.setattr("app.demo.seed_demo_applications", lambda app: None)
+    create_app(cfg)            # first boot: one startup run (left 'running', as if killed)
+    create_app(cfg)            # restart: interrupted run marked failed, NOT retried
+    app = create_app(cfg)
+    with app.app_context():
+        assert len(calls) == 1
+        assert [r.status for r in EvaluationRun.query.all()] == ["failed"]
+
+
+def test_prebuilt_data_is_copied_on_fresh_disk_without_accounts(tmp_path, monkeypatch):
+    from app import prebuild
+    from app.models import Application, EvaluationRun
+    from app.evaluation_runner import _execute
+    monkeypatch.setattr("app.demo.DEMO_CASES", [("tn_hsc", 101, "correct", (600, 800))])
+    monkeypatch.setattr("evaluation.evaluate.evaluate_marksheets",
+                        lambda d, s, e: {"sheets": 0, "groups": [], "outcomes": {"false_match": 0}})
+    monkeypatch.setattr("evaluation.evaluate.evaluate_photos", lambda d, s, e: {"photos": 0})
+    monkeypatch.setattr("app.evaluation_runner.generate", lambda target: (target.mkdir(parents=True, exist_ok=True),
+                        (target / "ground_truth.json").write_text('{"seed": 1}')))
+    prebuild.main(tmp_path / "seed")
+    live = tmp_path / "live"
+    app = create_app(make_config(live, PREBUILT_DATA_DIR=tmp_path / "seed", SEED_DEMO=True,
+                                 SEED_EVALUATION=True, UPLOAD_DIR=live / "uploads"))
+    with app.app_context():
+        assert Application.query.filter_by(is_demo=True).count() == 1
+        assert EvaluationRun.query.filter_by(status="done").count() == 1
+        assert sorted(u.role for u in User.query.all()) == ["admin", "reviewer"]

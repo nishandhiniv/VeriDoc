@@ -1,4 +1,5 @@
 import logging
+import shutil
 
 from flask import Flask
 from flask_login import LoginManager
@@ -25,6 +26,10 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     data_dir = app.config["DATA_DIR"]
+    seed_from = app.config.get("PREBUILT_DATA_DIR")
+    if seed_from and seed_from.exists() and not (data_dir / "veridoc.sqlite").exists():
+        # Fresh disk: start from the data prepared when the image was built (app/prebuild.py).
+        shutil.copytree(seed_from, data_dir, dirs_exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
     app.config["UPLOAD_DIR"].mkdir(parents=True, exist_ok=True)
 

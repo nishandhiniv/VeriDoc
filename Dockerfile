@@ -31,6 +31,10 @@ COPY dataset ./dataset
 COPY evaluation ./evaluation
 COPY wsgi.py .
 
+# Run the engine once now: demo applications, dataset and first accuracy run (app/prebuild.py).
+RUN OMP_THREAD_LIMIT=4 python -m app.prebuild /app/seed-data
+ENV PREBUILT_DATA_DIR=/app/seed-data
+
 RUN useradd --create-home veridoc && mkdir -p /app/data && chown -R veridoc /app/data
 USER veridoc
 

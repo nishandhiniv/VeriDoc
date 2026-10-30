@@ -8,7 +8,7 @@
   <form method="post" action="{{ url_for('staff.run_accuracy') }}" class="actions no-print">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn" type="submit" {{ 'disabled' if running }}>{{ "Evaluation running…" if running else "Run evaluation" }}</button>
-    {% if running %}<span class="muted small" role="status">This takes one to a few minutes. The page refreshes by itself.</span>{% endif %}
+    {% if running %}<span class="muted small" role="status">This takes a few minutes, or up to about 15 on a free hosting plan. The page refreshes by itself.</span>{% endif %}
   </form>
   {% if last_failed and not running %}<p class="notice notice--error">The last evaluation run did not finish. Run it again.</p>{% endif %}
 
