@@ -1,0 +1,32 @@
+{% macro field_error(errors, name) -%}
+  {% if errors.get(name) %}<span class="error-text" id="{{ name }}-error">{{ errors[name] }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro described(errors, name, hint=None) -%}
+  {%- set ids = [] -%}
+  {%- if hint %}{% set _ = ids.append(name ~ '-hint') %}{% endif -%}
+  {%- if errors.get(name) %}{% set _ = ids.append(name ~ '-error') %}{% endif -%}
+  {%- if ids %} aria-describedby="{{ ids|join(' ') }}"{% endif %}{% if errors.get(name) %} aria-invalid="true"{% endif -%}
+{%- endmacro %}
+
+{% macro steps(current) -%}
+  <ol class="steps">
+    {% for label in ["Details and marks", "Documents", "Check and submit"] %}
+      <li {% if loop.index == current %}aria-current="step"{% elif loop.index < current %}class="done"{% endif %}>
+        {{ loop.index }}. {{ label }}
+      </li>
+    {% endfor %}
+  </ol>
+{%- endmacro %}
+
+{% set RESULT_LABELS = {
+  "match": ("ok", "✓", "Match"), "pass": ("ok", "✓", "Pass"),
+  "mismatch": ("bad", "✕", "Mismatch"), "fail": ("bad", "✕", "Fail"),
+  "missing": ("bad", "?", "Missing on sheet"), "not_entered": ("bad", "+", "Not entered"),
+  "unreadable": ("warn", "!", "Unreadable"), "review": ("warn", "!", "Needs review"),
+  "error": ("warn", "!", "Processing error")} %}
+
+{% macro badge(result) -%}
+  {%- set kind, icon, label = RESULT_LABELS.get(result, ("info", "i", result)) -%}
+  <span class="badge badge--{{ kind }}" data-icon="{{ icon }}">{{ label }}</span>
+{%- endmacro %}

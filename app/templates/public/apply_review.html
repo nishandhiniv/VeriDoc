@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_macros.html" import steps %}
+{% block title %}Check and submit{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+  {{ steps(3) }}
+  <h1>Check your application</h1>
+  <p>Make sure everything matches your mark sheet. You can't change your application after you submit it.</p>
+
+  {% set d = draft.details %}
+  <section class="sheet review-section">
+    <h2 class="h-inline">Details <a class="small" href="{{ url_for('public.apply_details') }}">Edit<span class="visually-hidden"> details</span></a></h2>
+    <table class="ruled">
+      <tbody>
+        <tr><th scope="row">Full name</th><td>{{ d.full_name }}</td></tr>
+        <tr><th scope="row">Date of birth</th><td class="num">{{ d.date_of_birth }}</td></tr>
+        <tr><th scope="row">Contact</th><td>{{ d.contact }}</td></tr>
+        <tr><th scope="row">Board and exam</th><td>{{ template.label }}</td></tr>
+        <tr><th scope="row">Register or roll number</th><td class="num">{{ d.register_number }}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sheet review-section">
+    <h2 class="h-inline">Subject marks <a class="small" href="{{ url_for('public.apply_details') }}">Edit<span class="visually-hidden"> marks</span></a></h2>
+    <table class="ruled" id="review-marks">
+      <thead><tr><th scope="col">Subject</th><th scope="col">Total mark</th></tr></thead>
+      <tbody>
+        {% for subject, mark in draft.marks %}<tr><td>{{ subject }}</td><td class="num">{{ mark }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sheet review-section">
+    <h2 class="h-inline">Documents <a class="small" href="{{ url_for('public.apply_uploads') }}">Edit<span class="visually-hidden"> documents</span></a></h2>
+    <div class="grid-2">
+      <figure><img src="{{ url_for('public.draft_file', kind='marksheet') }}" alt="Your uploaded mark sheet"><figcaption class="small muted">Mark sheet: {{ draft.files.marksheet.original }}</figcaption></figure>
+      <figure><img src="{{ url_for('public.draft_file', kind='photo') }}" alt="Your uploaded profile photo" style="max-height:260px"><figcaption class="small muted">Photo: {{ draft.files.photo.original }}</figcaption></figure>
+    </div>
+  </section>
+
+  <form method="post" class="actions" id="submit-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn" type="submit" id="submit-btn">Submit application</button>
+    <span class="muted small" id="submit-wait" hidden role="status">Checking your documents. This can take up to 20 seconds…</span>
+  </form>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById("submit-form").addEventListener("submit", function () {
+    var b = document.getElementById("submit-btn"); b.disabled = true; b.textContent = "Submitting…";
+    document.getElementById("submit-wait").hidden = false;
+  });
+</script>
+{% endblock %}

@@ -1,5 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Apply{% endblock %}
+{% block nav %}<a href="{{ url_for('staff.login') }}">Staff sign in</a>{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
 {% block content %}
-  <h1>VeriDoc</h1>
+  <h1>Submit your admission documents</h1>
+  <p>Enter your Class 12 marks and upload your mark sheet and a profile photo. VeriDoc checks that the marks you type match your mark sheet and that your photo meets the rules below, so a reviewer only contacts you if something needs fixing.</p>
+  <p class="notice notice--warning">This is a prototype. Use the synthetic sample documents only. Do not upload real documents.</p>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>Your board, register or roll number, and the total mark for each subject. Accepted:
+      {% for b in boards %}{{ b.label }}{% if not loop.last %}, {% endif %}{% endfor %}.</li>
+    <li>A clear photo or scan of your mark sheet, as JPG or PNG, up to {{ rules.marksheet_max_mb }} MB.</li>
+    <li>A recent profile photo that meets the rules below.</li>
+  </ul>
+
+  <h2>Photo rules</h2>
+  <div class="table-wrap">
+    <table class="ruled" id="photo-rules">
+      <thead><tr><th scope="col">Rule</th><th scope="col">Requirement</th></tr></thead>
+      <tbody>
+        <tr><td>File format</td><td>{{ rules.photo_formats|join(" or ") }}</td></tr>
+        <tr><td>File size</td><td class="num">{{ rules.photo_min_kb }} KB to {{ (rules.photo_max_kb / 1024)|round(1) }} MB</td></tr>
+        <tr><td>Minimum size</td><td class="num">{{ rules.photo_min_width }} × {{ rules.photo_min_height }} pixels</td></tr>
+        <tr><td>Maximum size</td><td class="num">{{ rules.photo_max_width }} × {{ rules.photo_max_height }} pixels</td></tr>
+        <tr><td>Shape</td><td class="num">Width ÷ height between {{ "%.2f"|format(rules.photo_ratio_min) }} and {{ "%.2f"|format(rules.photo_ratio_max) }} (passport style, 3:4)</td></tr>
+        <tr><td>Orientation</td><td>{{ rules.photo_orientation|capitalize }}: taller than it is wide</td></tr>
+        <tr><td>Lighting and focus</td><td>Evenly lit, not too dark or washed out, and in focus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="{{ url_for('public.apply_details') }}">Start application</a>
+  </div>
 {% endblock %}

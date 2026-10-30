@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Review queue{% endblock %}
+{% block nav %}{% include "staff/_nav.html" %}{% endblock %}
+{% block content %}
+  <h1>Review queue</h1>
+  <nav class="tabs" aria-label="Filter by status">
+    {% for key, label in tabs %}
+      <a href="{{ url_for('staff.queue', status=key) }}" {{ 'aria-current=page' if state == key }}>
+        {{ label }} <span class="count num">{{ counts[key] }}</span>
+      </a>
+    {% endfor %}
+  </nav>
+  {% if apps %}
+    <div class="table-wrap">
+      <table class="ruled queue" id="queue">
+        <thead><tr>
+          <th scope="col">Reference</th><th scope="col">Name</th><th scope="col">Board</th>
+          <th scope="col">Submitted</th><th scope="col">Status</th><th scope="col" class="num">Issues</th>
+        </tr></thead>
+        <tbody>
+        {% for a in apps %}
+          <tr>
+            <td><a href="{{ url_for('staff.report', reference=a.reference) }}">{{ a.reference }}</a></td>
+            <td>{{ a.full_name }}</td>
+            <td>{{ templates[a.board].short_label if a.board in templates else a.board }}</td>
+            <td class="num">{{ a.created_at.strftime("%d %b %Y, %H:%M") }}</td>
+            <td>
+              {% if a.decision %}
+                <span class="badge badge--info" data-icon="i">{{ decisions[a.decision] }}</span>
+              {% elif a.auto_status == "auto_cleared" %}
+                <span class="badge badge--ok" data-icon="✓">Auto-cleared</span>
+              {% else %}
+                <span class="badge badge--warn" data-icon="!">Needs review</span>
+              {% endif %}
+            </td>
+            <td class="num">{{ a.issue_count }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="sheet empty">
+      {% if state == "needs_review" %}No applications need review right now.
+      {% elif state == "auto_cleared" %}No auto-cleared applications are waiting.
+      {% else %}No decisions have been recorded yet.{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

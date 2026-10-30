@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Application submitted{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+  <h1>Application submitted</h1>
+  <p>Your reference number is</p>
+  <p class="reference num" id="reference">{{ reference }}</p>
+  <p>Keep this number. You'll need it if Maatram contacts you about your application.</p>
+  <h2>What happens next</h2>
+  <p>Your marks and photo have been checked automatically. If anything needs a closer look, a reviewer will check it and contact you using the details you gave.</p>
+  <div class="actions"><a class="btn btn--secondary" href="{{ url_for('public.home') }}">Back to the home page</a></div>
+{% endblock %}

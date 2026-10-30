@@ -154,3 +154,37 @@ table.ruled tr.is-warn td:first-child { box-shadow: inset 4px 0 0 var(--warn); }
   .topbar, .footer, .no-print { display: none !important; }
   body { background: #fff; }
 }
+
+/* Applicant flow */
+.reference { font-size: 34px; font-weight: 700; letter-spacing: 0.02em; padding: 12px 16px; background: var(--paper); border: 2px solid var(--ink); display: inline-block; user-select: all; }
+.upload-preview { display: block; max-height: 220px; margin-top: 8px; border: 1px solid var(--rule); }
+.review-section { margin-bottom: 16px; }
+.review-section h2 { margin-top: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 20px; }
+.review-section th[scope=row] { width: 40%; color: var(--ink-2); font-weight: 500; }
+figure { margin: 0; }
+figure img { border: 1px solid var(--rule); background: var(--paper); }
+.subject-rows td { padding: 6px 8px; }
+.subject-rows select { max-width: 320px; }
+
+/* Staff */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); margin-bottom: 16px; flex-wrap: wrap; }
+.tabs a { padding: 10px 14px; text-decoration: none; color: var(--ink-2); border-bottom: 3px solid transparent; margin-bottom: -1px; font-weight: 500; }
+.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--brand); font-weight: 600; }
+.tabs .count { display: inline-block; min-width: 24px; padding: 0 6px; margin-left: 4px; background: var(--wash); border: 1px solid var(--rule); font-size: 14px; text-align: center; }
+.empty { color: var(--ink-2); }
+.report-head h1 { font-size: 26px; }
+.report-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 32px; align-items: start; margin-top: 16px; }
+.report-docs { position: sticky; top: 16px; display: grid; gap: 16px; }
+.report-docs img { width: 100%; }
+.report-docs img.photo { max-width: 220px; }
+@media (max-width: 900px) { .report-grid { grid-template-columns: 1fr; } .report-docs { position: static; } }
+table.report { margin-bottom: 24px; }
+table.report th[scope=row] { font-weight: 600; width: 30%; }
+table.report td:nth-child(2) { width: 22%; }
+.rule { display: block; margin-top: 2px; }
+.decision { margin-top: 8px; }
+.decision h2 { margin-top: 0; font-size: 20px; }
+.choice { display: inline-flex; gap: 6px; align-items: center; margin-right: 20px; font-weight: 500; padding: 6px 0; }
+.choice input { width: 18px; height: 18px; accent-color: var(--brand); }
+.history { padding-left: 20px; }
+.label { font-weight: 600; margin-bottom: 4px; text-align: left; }

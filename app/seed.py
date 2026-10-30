@@ -37,3 +37,7 @@ def seed_accounts():
 def seed_all(app):
     ensure_default_settings()
     seed_accounts()
+    if app.config.get("SEED_DEMO"):
+        from .demo import start_demo_seeding
+
+        start_demo_seeding(app)

@@ -1,0 +1,11 @@
+{% if current_user.is_authenticated %}
+  <a href="{{ url_for('staff.queue') }}" {{ 'aria-current=page' if request.endpoint in ('staff.queue', 'staff.report') }}>Review queue</a>
+  {% if current_user.is_admin %}
+    <a href="{{ url_for('staff.accuracy') }}" {{ 'aria-current=page' if request.endpoint == 'staff.accuracy' }}>Accuracy</a>
+  {% endif %}
+  <span class="who">{{ current_user.name }} · {{ current_user.role|capitalize }}</span>
+  <form method="post" action="{{ url_for('staff.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn--link" type="submit">Sign out</button>
+  </form>
+{% endif %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field_error, steps %}
+{% block title %}Upload documents{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+  {{ steps(2) }}
+  <h1>Upload your documents</h1>
+  <p class="notice notice--warning">Prototype: upload the synthetic sample documents only, never real documents.</p>
+  {% if errors %}
+    <div class="notice notice--error" role="alert"><strong>Check the highlighted files.</strong></div>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" class="sheet" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for kind, label, hint in [
+        ("marksheet", "Mark sheet", "A clear photo or scan of the whole page, JPG or PNG."),
+        ("photo", "Profile photo", "Passport style, taller than wide, at least " ~ rules.photo_min_width ~ " × " ~ rules.photo_min_height ~ " pixels.")] %}
+      <div class="field {{ 'field--error' if errors[kind] }} upload" data-kind="{{ kind }}">
+        <label for="{{ kind }}">{{ label }}</label>
+        <span class="hint" id="{{ kind }}-hint">{{ hint }}
+          {% if files[kind] %}<br>Uploaded: <strong>{{ files[kind].original }}</strong>. Choose a new file only to replace it.{% endif %}
+        </span>
+        <input type="file" id="{{ kind }}" name="{{ kind }}" accept="image/*" aria-describedby="{{ kind }}-hint{{ ' ' ~ kind ~ '-error' if errors[kind] }}">
+        {{ field_error(errors, kind) }}
+        <img class="upload-preview" alt="" {% if files[kind] %}src="{{ url_for('public.draft_file', kind=kind) }}"{% else %}hidden{% endif %}>
+      </div>
+    {% endfor %}
+    <div class="actions">
+      <button class="btn" type="submit">Continue to check and submit</button>
+      <a href="{{ url_for('public.apply_details') }}">Back to details</a>
+    </div>
+  </form>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll(".upload").forEach(function (box) {
+    var input = box.querySelector("input[type=file]"), img = box.querySelector(".upload-preview");
+    input.addEventListener("change", function () {
+      if (input.files && input.files[0] && input.files[0].type.indexOf("image/") === 0) {
+        img.src = URL.createObjectURL(input.files[0]); img.hidden = false;
+      }
+    });
+  });
+</script>
+{% endblock %}

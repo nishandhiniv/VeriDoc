@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Accuracy{% endblock %}
+{% block nav %}{% include "staff/_nav.html" %}{% endblock %}
+{% block content %}
+  <h1>Accuracy</h1>
+  {% if not run %}<p class="sheet empty">No evaluation has been run yet.</p>{% endif %}
+{% endblock %}

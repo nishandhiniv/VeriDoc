@@ -23,9 +23,12 @@ class Config:
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
     REMEMBER_COOKIE_HTTPONLY = True
     SEED_DEMO = os.environ.get("SEED_DEMO", "1") == "1"
+    # Seed in the background so the server answers immediately on slow hosts.
+    SEED_DEMO_ASYNC = os.environ.get("SEED_DEMO_ASYNC", "1") == "1"
 
 
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
     SEED_DEMO = False
+    SEED_DEMO_ASYNC = False

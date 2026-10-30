@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field_error, described, steps %}
+{% block title %}Your details and marks{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+  {{ steps(1) }}
+  <h1>Your details and marks</h1>
+  {% if errors %}
+    <div class="notice notice--error" role="alert" id="error-summary">
+      <strong>Check the highlighted fields.</strong> {{ errors|length }} {{ "thing needs" if errors|length == 1 else "things need" }} fixing.
+    </div>
+  {% endif %}
+  <form method="post" class="sheet" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <fieldset>
+      <legend>About you</legend>
+      <div class="field {{ 'field--error' if errors.full_name }}">
+        <label for="full_name">Full name</label>
+        <span class="hint" id="full_name-hint">As printed on your mark sheet</span>
+        <input type="text" id="full_name" name="full_name" value="{{ data.full_name or '' }}" autocomplete="name" {{ described(errors, 'full_name', true) }}>
+        {{ field_error(errors, 'full_name') }}
+      </div>
+      <div class="grid-2">
+        <div class="field {{ 'field--error' if errors.date_of_birth }}">
+          <label for="date_of_birth">Date of birth</label>
+          <input type="date" id="date_of_birth" name="date_of_birth" value="{{ data.date_of_birth or '' }}" autocomplete="bday" {{ described(errors, 'date_of_birth') }}>
+          {{ field_error(errors, 'date_of_birth') }}
+        </div>
+        <div class="field {{ 'field--error' if errors.contact }}">
+          <label for="contact">Email or mobile number</label>
+          <input type="text" id="contact" name="contact" value="{{ data.contact or '' }}" autocomplete="email" {{ described(errors, 'contact') }}>
+          {{ field_error(errors, 'contact') }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your exam</legend>
+      <div class="grid-2">
+        <div class="field {{ 'field--error' if errors.board }}">
+          <label for="board">Board and exam</label>
+          <select id="board" name="board" {{ described(errors, 'board') }}>
+            <option value="">Choose…</option>
+            {% for b in boards %}
+              <option value="{{ b.id }}" {{ 'selected' if data.board == b.id }}>{{ b.label }}</option>
+            {% endfor %}
+          </select>
+          {{ field_error(errors, 'board') }}
+        </div>
+        <div class="field {{ 'field--error' if errors.register_number }}">
+          <label for="register_number">Register or roll number</label>
+          <input type="text" id="register_number" name="register_number" value="{{ data.register_number or '' }}" inputmode="numeric" {{ described(errors, 'register_number') }}>
+          {{ field_error(errors, 'register_number') }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset {{ 'class=field--error' if errors.subjects }}>
+      <legend>Subject marks</legend>
+      <p class="hint" id="subjects-hint">Enter the <strong>total</strong> mark for each subject exactly as printed on your mark sheet. For CBSE, use the Total column, not Theory. Leave unused rows empty.</p>
+      {{ field_error(errors, 'subjects') }}
+      <div class="table-wrap">
+        <table class="ruled subject-rows">
+          <thead><tr><th scope="col">Subject</th><th scope="col">Total mark</th></tr></thead>
+          <tbody>
+          {% for i in range(rows) %}
+            {% set row = data.rows[i] if data.rows and i < data.rows|length else {"subject": "", "mark": ""} %}
+            <tr>
+              <td class="{{ 'field--error' if errors['subject_' ~ i] }}">
+                <label class="visually-hidden" for="subject_{{ i }}">Subject {{ i + 1 }}</label>
+                <select id="subject_{{ i }}" name="subject_{{ i }}" class="subject-select" data-selected="{{ row.subject }}" {{ described(errors, 'subject_' ~ i) }}>
+                  <option value="">—</option>
+                  {% for b in boards %}{% for s in b.subjects %}
+                    <option value="{{ s.name }}" data-board="{{ b.id }}" {{ 'selected' if row.subject == s.name and (not data.board or data.board == b.id) }}>{{ s.name }}</option>
+                  {% endfor %}{% endfor %}
+                </select>
+                {{ field_error(errors, 'subject_' ~ i) }}
+              </td>
+              <td class="{{ 'field--error' if errors['mark_' ~ i] }}">
+                <label class="visually-hidden" for="mark_{{ i }}">Total mark for subject {{ i + 1 }}</label>
+                <input type="number" id="mark_{{ i }}" name="mark_{{ i }}" min="0" max="100" step="1" inputmode="numeric" value="{{ row.mark }}" style="max-width:120px" {{ described(errors, 'mark_' ~ i) }}>
+                {{ field_error(errors, 'mark_' ~ i) }}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn" type="submit">Continue to documents</button>
+    </div>
+  </form>
+{% endblock %}
+{% block scripts %}
+<script>
+  // Show only the chosen board's subjects. Without JavaScript all subjects show and the server still checks.
+  (function () {
+    var board = document.getElementById("board");
+    var selects = document.querySelectorAll(".subject-select");
+    var all = Array.prototype.map.call(selects, function (s) {
+      return Array.prototype.slice.call(s.options).map(function (o) { return o.cloneNode(true); });
+    });
+    function filter() {
+      selects.forEach(function (sel, i) {
+        var keep = sel.value;
+        sel.innerHTML = "";
+        all[i].forEach(function (o) {
+          if (!o.dataset.board || !board.value || o.dataset.board === board.value) sel.appendChild(o.cloneNode(true));
+        });
+        sel.value = Array.prototype.some.call(sel.options, function (o) { return o.value === keep; }) ? keep : "";
+      });
+    }
+    board.addEventListener("change", filter);
+    filter();
+  })();
+</script>
+{% endblock %}

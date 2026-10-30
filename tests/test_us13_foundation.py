@@ -111,3 +111,18 @@ def test_security_headers(client):
     resp = client.get("/")
     assert resp.headers["X-Content-Type-Options"] == "nosniff"
     assert resp.headers["X-Frame-Options"] == "DENY"
+
+
+def test_ac1_demo_applications_seeded_through_real_engine_once(tmp_path, monkeypatch):
+    from app.models import Application
+    cfg = make_config(tmp_path, SEED_DEMO=True, SEED_DEMO_ASYNC=False)
+    app = create_app(cfg)
+    with app.app_context():
+        demo = Application.query.filter_by(is_demo=True).all()
+        statuses = {a.auto_status for a in demo}
+        assert len(demo) >= 6
+        assert statuses == {"auto_cleared", "needs_review"}  # a realistic mix
+        assert all(a.checks for a in demo)  # every one went through validation
+    create_app(cfg)  # restart
+    with app.app_context():
+        assert Application.query.filter_by(is_demo=True).count() == len(demo)

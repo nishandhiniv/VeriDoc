@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, field_error %}
+{% block title %}{{ app.reference }}{% endblock %}
+{% block nav %}{% include "staff/_nav.html" %}{% endblock %}
+{% block content %}
+  <p class="no-print"><a href="{{ url_for('staff.queue') }}">← Back to queue</a></p>
+  <header class="report-head">
+    <h1><span class="num">{{ app.reference }}</span> · {{ app.full_name }}</h1>
+    <p class="muted">{{ template.label if template else app.board }} · Register/roll no. <span class="num">{{ app.register_number }}</span> · Submitted <span class="num">{{ app.created_at.strftime("%d %b %Y, %H:%M") }}</span></p>
+    {% if app.decision %}
+      <p class="status-banner status-banner--decided" id="overall-status">Decided: {{ decisions[app.decision] }}</p>
+    {% elif app.auto_status == "auto_cleared" %}
+      <p class="status-banner status-banner--ok" id="overall-status">✓ Auto-cleared: every check passed</p>
+    {% else %}
+      <p class="status-banner status-banner--warn" id="overall-status">! Needs review: {{ app.issue_count }} {{ "issue" if app.issue_count == 1 else "issues" }}</p>
+    {% endif %}
+  </header>
+
+  <div class="report-grid">
+    <div class="report-main">
+      {% macro check_table(rows, caption, id) %}
+        {% if rows %}
+        <div class="table-wrap">
+          <table class="ruled report" id="{{ id }}">
+            <caption>{{ caption }}</caption>
+            <thead><tr><th scope="col">Validation</th><th scope="col">Result</th><th scope="col">Details</th></tr></thead>
+            <tbody>
+              {% for c in rows %}
+                <tr class="{{ 'is-issue' if c.result in ('mismatch', 'missing', 'not_entered', 'fail') else ('is-warn' if c.is_issue) }}">
+                  <th scope="row">{{ c.name }}{% if c.section == "marks" %} marks{% endif %}</th>
+                  <td>{{ badge(c.result) }}</td>
+                  <td>
+                    <span class="num">{{ c.detail }}</span>
+                    {% if c.rule or c.confidence is not none %}
+                      <span class="rule small muted">Rule: {{ c.rule }}{% if c.confidence is not none %} · OCR confidence {{ c.confidence|round|int }}{% endif %}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      {% endmacro %}
+      {{ check_table(sections.system, "Processing", "checks-system") }}
+      {{ check_table(sections.marks, "Marks: entered vs. uploaded", "checks-marks") }}
+      {{ check_table(sections.marksheet, "Mark sheet", "checks-marksheet") }}
+      {{ check_table(sections.photo, "Profile photo", "checks-photo") }}
+
+      <section class="sheet decision no-print" id="decision">
+        <h2>Decision</h2>
+        {% if app.decisions %}
+          <ol class="history">
+            {% for d in app.decisions %}
+              <li><strong>{{ decisions[d.decision] }}</strong> by {{ d.reviewer.name }}, <span class="num">{{ d.created_at.strftime("%d %b %Y, %H:%M") }}</span>{% if d.comment %}: “{{ d.comment }}”{% endif %}</li>
+            {% endfor %}
+          </ol>
+        {% endif %}
+        <form method="post" action="{{ url_for('staff.decide', reference=app.reference) }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <fieldset class="{{ 'field--error' if errors.decision }}">
+            <legend>{{ "Change the decision" if app.decision else "Record a decision" }}</legend>
+            {% for key, label in decisions.items() %}
+              <label class="choice"><input type="radio" name="decision" value="{{ key }}" {{ 'checked' if form.decision == key }}> {{ "Approve" if key == "approve" else ("Reject" if key == "reject" else "Request re-upload") }}</label>
+            {% endfor %}
+            {{ field_error(errors, 'decision') }}
+          </fieldset>
+          <div class="field {{ 'field--error' if errors.comment }}">
+            <label for="comment">Comment</label>
+            <span class="hint" id="comment-hint">Required for Reject and Request re-upload. Say what is wrong and what the applicant should do.</span>
+            <textarea id="comment" name="comment" aria-describedby="comment-hint{{ ' comment-error' if errors.comment }}">{{ form.comment or '' }}</textarea>
+            {{ field_error(errors, 'comment') }}
+          </div>
+          <button class="btn" type="submit">Record decision</button>
+        </form>
+      </section>
+    </div>
+
+    <aside class="report-docs" aria-label="Uploaded documents">
+      <figure>
+        <figcaption class="label">Mark sheet</figcaption>
+        <a href="{{ url_for('staff.application_file', reference=app.reference, kind='marksheet') }}" target="_blank" rel="noopener">
+          <img src="{{ url_for('staff.application_file', reference=app.reference, kind='marksheet') }}" alt="Uploaded mark sheet for {{ app.full_name }}">
+        </a>
+        <span class="small muted">Open full size in a new tab</span>
+      </figure>
+      <figure>
+        <figcaption class="label">Profile photo</figcaption>
+        <img class="photo" src="{{ url_for('staff.application_file', reference=app.reference, kind='photo') }}" alt="Uploaded profile photo for {{ app.full_name }}">
+      </figure>
+      <table class="ruled small">
+        <caption class="label">Entered in the form</caption>
+        <tbody>
+          <tr><th scope="row">Date of birth</th><td class="num">{{ app.date_of_birth.strftime("%d/%m/%Y") }}</td></tr>
+          <tr><th scope="row">Contact</th><td>{{ app.contact }}</td></tr>
+        </tbody>
+      </table>
+    </aside>
+  </div>
+{% endblock %}
