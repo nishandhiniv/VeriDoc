@@ -1,0 +1,39 @@
+{
+  "id": "cbse_xii",
+  "label": "CBSE – Class XII",
+  "short_label": "CBSE XII",
+  "board": "Central Board of Secondary Education",
+  "exam": "Senior School Certificate Examination (Class 12)",
+  "title_lines": [
+    "CENTRAL BOARD OF SECONDARY EDUCATION (SYNTHETIC SPECIMEN)",
+    "SENIOR SCHOOL CERTIFICATE EXAMINATION - MARKS STATEMENT"
+  ],
+  "identify_keywords": ["SENIOR SCHOOL"],
+  "min_subjects": 5,
+  "max_subjects": 6,
+  "columns": ["CODE", "SUBJECT", "THEORY", "PRAC/IA", "TOTAL", "GRADE"],
+  "mark_column": "TOTAL",
+  "mark_column_keyword": "TOTAL",
+  "has_subject_code": true,
+  "total_row_keyword": "RESULT",
+  "subjects": [
+    {"name": "English Core", "code": "301", "max": 100, "theory_max": 80, "aliases": ["ENGLISH CORE", "ENGLISH"]},
+    {"name": "Hindi Core", "code": "302", "max": 100, "theory_max": 80, "aliases": ["HINDI CORE", "HINDI"]},
+    {"name": "Mathematics", "code": "041", "max": 100, "theory_max": 80, "aliases": ["MATHEMATICS", "MATHS"]},
+    {"name": "Physics", "code": "042", "max": 100, "theory_max": 70, "aliases": ["PHYSICS"]},
+    {"name": "Chemistry", "code": "043", "max": 100, "theory_max": 70, "aliases": ["CHEMISTRY"]},
+    {"name": "Biology", "code": "044", "max": 100, "theory_max": 70, "aliases": ["BIOLOGY"]},
+    {"name": "Computer Science", "code": "083", "max": 100, "theory_max": 70, "aliases": ["COMPUTER SCIENCE"]},
+    {"name": "Accountancy", "code": "055", "max": 100, "theory_max": 80, "aliases": ["ACCOUNTANCY"]},
+    {"name": "Business Studies", "code": "054", "max": 100, "theory_max": 80, "aliases": ["BUSINESS STUDIES"]},
+    {"name": "Economics", "code": "030", "max": 100, "theory_max": 80, "aliases": ["ECONOMICS"]},
+    {"name": "Physical Education", "code": "048", "max": 100, "theory_max": 70, "aliases": ["PHYSICAL EDUCATION"]},
+    {"name": "Informatics Practices", "code": "065", "max": 100, "theory_max": 70, "aliases": ["INFORMATICS PRACTICES"]}
+  ],
+  "streams": [
+    ["English Core", "Mathematics", "Physics", "Chemistry", "Biology"],
+    ["English Core", "Mathematics", "Physics", "Chemistry", "Computer Science"],
+    ["English Core", "Accountancy", "Business Studies", "Economics", "Mathematics"],
+    ["English Core", "Physics", "Chemistry", "Biology", "Physical Education", "Hindi Core"]
+  ]
+}

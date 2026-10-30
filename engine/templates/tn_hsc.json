@@ -1,0 +1,39 @@
+{
+  "id": "tn_hsc",
+  "label": "Tamil Nadu State Board – HSC (+2)",
+  "short_label": "TN HSC",
+  "board": "Tamil Nadu State Board",
+  "exam": "Higher Secondary Course (Class 12)",
+  "title_lines": [
+    "STATE BOARD OF SCHOOL EXAMINATIONS (SYNTHETIC SPECIMEN)",
+    "HIGHER SECONDARY COURSE EXAMINATION - STATEMENT OF MARKS"
+  ],
+  "identify_keywords": ["HIGHER SECONDARY"],
+  "min_subjects": 5,
+  "max_subjects": 6,
+  "columns": ["SUBJECT", "MAX", "MARKS OBTAINED"],
+  "mark_column": "MARKS OBTAINED",
+  "mark_column_keyword": "OBTAINED",
+  "has_subject_code": false,
+  "total_row_keyword": "TOTAL",
+  "subjects": [
+    {"name": "Tamil", "max": 100, "aliases": ["TAMIL", "PART I TAMIL"]},
+    {"name": "English", "max": 100, "aliases": ["ENGLISH", "PART II ENGLISH"]},
+    {"name": "Mathematics", "max": 100, "aliases": ["MATHEMATICS", "MATHS"]},
+    {"name": "Physics", "max": 100, "aliases": ["PHYSICS"]},
+    {"name": "Chemistry", "max": 100, "aliases": ["CHEMISTRY"]},
+    {"name": "Biology", "max": 100, "aliases": ["BIOLOGY"]},
+    {"name": "Computer Science", "max": 100, "aliases": ["COMPUTER SCIENCE"]},
+    {"name": "Accountancy", "max": 100, "aliases": ["ACCOUNTANCY"]},
+    {"name": "Commerce", "max": 100, "aliases": ["COMMERCE"]},
+    {"name": "Economics", "max": 100, "aliases": ["ECONOMICS"]},
+    {"name": "Business Mathematics", "max": 100, "aliases": ["BUSINESS MATHEMATICS", "BUSINESS MATHS"]},
+    {"name": "History", "max": 100, "aliases": ["HISTORY"]}
+  ],
+  "streams": [
+    ["Tamil", "English", "Mathematics", "Physics", "Chemistry", "Biology"],
+    ["Tamil", "English", "Mathematics", "Physics", "Chemistry", "Computer Science"],
+    ["Tamil", "English", "Accountancy", "Commerce", "Economics", "Business Mathematics"],
+    ["Tamil", "English", "History", "Economics", "Commerce", "Accountancy"]
+  ]
+}

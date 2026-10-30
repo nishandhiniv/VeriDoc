@@ -19,7 +19,7 @@ DEFAULT_SETTINGS = {
     "photo_orientation": "portrait",
     "photo_brightness_min": 70,
     "photo_brightness_max": 210,
-    "photo_sharpness_min": 60,
+    "photo_sharpness_min": 25,  # tuned on the synthetic set (blurred <= 1, sharp >= 67)
     "photo_contrast_min": 25,
     # Mark sheet file
     "marksheet_formats": ["JPEG", "PNG"],
