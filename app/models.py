@@ -142,8 +142,12 @@ class EvaluationRun(db.Model):
     __tablename__ = "evaluation_runs"
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-    report_json = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default="running")  # running | done | failed
+    started_by = db.Column(db.String(120))
+    report_json = db.Column(db.Text)
+
+    __table_args__ = (db.CheckConstraint("status IN ('running', 'done', 'failed')", name="ck_eval_status"),)
 
     @property
     def report(self):
-        return json.loads(self.report_json)
+        return json.loads(self.report_json) if self.report_json else None

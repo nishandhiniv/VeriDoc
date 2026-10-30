@@ -3,5 +3,85 @@
 {% block nav %}{% include "staff/_nav.html" %}{% endblock %}
 {% block content %}
   <h1>Accuracy</h1>
-  {% if not run %}<p class="sheet empty">No evaluation has been run yet.</p>{% endif %}
+  <p>Runs the real validation engine over a labelled synthetic dataset and compares every result with the known correct answer. Nothing on this page is estimated.</p>
+
+  <form method="post" action="{{ url_for('staff.run_accuracy') }}" class="actions no-print">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn" type="submit" {{ 'disabled' if running }}>{{ "Evaluation running…" if running else "Run evaluation" }}</button>
+    {% if running %}<span class="muted small" role="status">This takes one to a few minutes. The page refreshes by itself.</span>{% endif %}
+  </form>
+  {% if last_failed and not running %}<p class="notice notice--error">The last evaluation run did not finish. Run it again.</p>{% endif %}
+
+  {% if not report %}
+    <p class="sheet empty">{{ "The first evaluation is running." if running else "No evaluation has been run yet." }}</p>
+  {% else %}
+    {% set m = report.marks %}{% set p = report.photos %}
+    <p class="measured" id="measured-label">Measured on synthetic data, {{ report.run_at }}, n = {{ report.dataset.marksheets }} mark sheets + {{ report.dataset.photos }} photos (seed {{ report.dataset.seed }}). Took {{ report.seconds }} s.</p>
+
+    {% if report.false_match > 0 %}
+      <p class="gate gate--bad" id="failsafe-gate" role="alert">✕ Fail-safe broken: {{ report.false_match }} planted {{ "error was" if report.false_match == 1 else "errors were" }} reported as Match. This blocks release (SM-2).</p>
+    {% else %}
+      <p class="gate gate--ok" id="failsafe-gate">✓ Fail-safe holds: 0 planted errors were reported as Match.</p>
+    {% endif %}
+
+    <h2>Headline figures</h2>
+    <div class="table-wrap">
+      <table class="ruled" id="headline">
+        <thead><tr><th scope="col">Measure</th><th scope="col" class="num">Result</th><th scope="col">Target</th></tr></thead>
+        <tbody>
+          <tr><td>False matches on planted errors</td><td class="num"><strong>{{ report.false_match }}</strong></td><td>0 (release gate)</td></tr>
+          <tr><td>Mark extraction accuracy, clean sheets</td><td class="num">{{ m.clean_accuracy }} %</td><td>≥ 95 %</td></tr>
+          <tr><td>Mark extraction accuracy, degraded sheets</td><td class="num">{{ m.degraded_accuracy }} %</td><td>reported</td></tr>
+          <tr><td>Wrong values trusted by OCR</td><td class="num">{{ m.wrong_trusted }}</td><td>0</td></tr>
+          <tr><td>Planted errors detected (recall)</td><td class="num">{{ m.outcomes.recall }} %</td><td>100 %</td></tr>
+          <tr><td>Flags that were real problems (precision)</td><td class="num">{{ m.outcomes.precision }} %</td><td>reported</td></tr>
+          <tr><td>Applications with planted errors sent to review</td><td class="num">{{ m.applications.planted_to_review_pct }} %</td><td>100 %</td></tr>
+          <tr><td>Correct applications sent to review (false alarms)</td><td class="num">{{ m.applications.clean_to_review_pct }} %</td><td>reported</td></tr>
+          <tr><td>Photo rule results agreeing with labels</td><td class="num">{{ p.overall }} %</td><td>100 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Mark extraction by template</h2>
+    <div class="table-wrap">
+      <table class="ruled" id="by-template">
+        <thead><tr><th scope="col">Template</th><th scope="col">Variant</th><th scope="col" class="num">Sheets</th><th scope="col" class="num">Marks</th><th scope="col" class="num">Correct</th><th scope="col" class="num">Unsure → review</th><th scope="col" class="num">Wrong but trusted</th><th scope="col" class="num">Accuracy</th></tr></thead>
+        <tbody>
+          {% for g in m.groups %}
+            <tr><td>{{ g.template }}</td><td>{{ g.variant|capitalize }}</td><td class="num">{{ g.sheets }}</td><td class="num">{{ g.fields }}</td><td class="num">{{ g.correct }}</td><td class="num">{{ g.untrusted }}</td><td class="num">{{ g.wrong }}</td><td class="num">{{ g.accuracy }} %</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Photo rules</h2>
+    <div class="table-wrap">
+      <table class="ruled" id="by-rule">
+        <thead><tr><th scope="col">Rule</th><th scope="col" class="num">Photos</th><th scope="col" class="num">Agree with label</th><th scope="col" class="num">Accuracy</th></tr></thead>
+        <tbody>
+          {% for r in p.rules %}<tr><td>{{ r.rule }}</td><td class="num">{{ r.total }}</td><td class="num">{{ r.agree }}</td><td class="num">{{ r.accuracy }} %</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Every error in this run</h2>
+    {% if report.errors %}
+      <div class="table-wrap">
+        <table class="ruled" id="errors">
+          <thead><tr><th scope="col">File</th><th scope="col">Field</th><th scope="col">Expected</th><th scope="col">Got</th><th scope="col">Note</th></tr></thead>
+          <tbody>
+            {% for e in report.errors %}<tr><td>{{ e.file }}</td><td>{{ e.field }}</td><td class="num">{{ e.expected }}</td><td class="num">{{ e.got }}</td><td>{{ e.note }}</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p id="errors">None. Every extracted mark, outcome and photo rule matched the ground truth.</p>
+    {% endif %}
+
+    <h2>How to read these numbers</h2>
+    <p>The dataset is generated by VeriDoc's own tool: fictional candidates on mark sheets that follow the general TN HSC and CBSE XII structure, half of them degraded with blur, skew, low light and noise. The engine was developed against sheets from the same generator, so these results show the method works on these templates. They are <strong>not</strong> a measurement of accuracy on real mark sheets, which would need a test on real (consented, anonymised) documents.</p>
+  {% endif %}
+{% endblock %}
+{% block scripts %}
+  {% if running %}<script>setTimeout(function () { location.reload(); }, 5000);</script>{% endif %}
 {% endblock %}

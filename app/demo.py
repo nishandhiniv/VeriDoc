@@ -84,8 +84,19 @@ def seed_demo_applications(app):
         log.info("Seeded %d demo applications", created)
 
 
+def seed_demo(app):
+    """Demo applications, then a first accuracy run so the Accuracy page is never empty."""
+    seed_demo_applications(app)
+    if app.config.get("SEED_EVALUATION"):
+        from .evaluation_runner import start_evaluation
+        from .models import EvaluationRun
+        with app.app_context():
+            if not EvaluationRun.query.filter_by(status="done").first():
+                start_evaluation(app, "startup", background=False)
+
+
 def start_demo_seeding(app):
     if app.config.get("SEED_DEMO_ASYNC"):
-        threading.Thread(target=seed_demo_applications, args=(app,), daemon=True, name="demo-seed").start()
+        threading.Thread(target=seed_demo, args=(app,), daemon=True, name="demo-seed").start()
     else:
-        seed_demo_applications(app)
+        seed_demo(app)

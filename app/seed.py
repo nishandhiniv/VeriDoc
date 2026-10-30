@@ -37,6 +37,9 @@ def seed_accounts():
 def seed_all(app):
     ensure_default_settings()
     seed_accounts()
+    from .evaluation_runner import mark_interrupted_runs
+
+    mark_interrupted_runs()
     if app.config.get("SEED_DEMO"):
         from .demo import start_demo_seeding
 

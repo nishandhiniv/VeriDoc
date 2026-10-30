@@ -25,6 +25,7 @@ class Config:
     SEED_DEMO = os.environ.get("SEED_DEMO", "1") == "1"
     # Seed in the background so the server answers immediately on slow hosts.
     SEED_DEMO_ASYNC = os.environ.get("SEED_DEMO_ASYNC", "1") == "1"
+    SEED_EVALUATION = os.environ.get("SEED_EVALUATION", "1") == "1"
 
 
 class TestConfig(Config):
@@ -32,3 +33,4 @@ class TestConfig(Config):
     WTF_CSRF_ENABLED = False
     SEED_DEMO = False
     SEED_DEMO_ASYNC = False
+    SEED_EVALUATION = False

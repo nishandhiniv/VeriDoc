@@ -120,11 +120,16 @@ def validate_marks(entered, marksheet_bytes, template_id, settings):
                                detail=f"The mark sheet could not be processed ({type(exc).__name__}). "
                                       "Sent to manual review.")] \
             + unverified_marks(entered, "mark sheet could not be processed")
+    return mark_checks(entered, sheet, template, settings) + checks
+
+
+def mark_checks(entered, sheet, template, settings):
+    """Report rows for the marks, given a mark sheet reading (also used by the evaluation)."""
     if not sheet.layout_ok:
-        return checks + [Check("marksheet", "Mark sheet layout", "review", detail=sheet.reason,
-                               rule=f"must be a recognisable {template['short_label']} mark sheet")] \
+        return [Check("marksheet", "Mark sheet layout", "review", detail=sheet.reason,
+                      rule=f"must be a recognisable {template['short_label']} mark sheet")] \
             + unverified_marks(entered, "mark sheet layout not recognised")
-    return compare_marks(entered, sheet, settings) + [completeness(entered, sheet)] + checks
+    return compare_marks(entered, sheet, settings) + [completeness(entered, sheet)]
 
 
 def validate_application(entered, marksheet_bytes, photo_bytes, template_id, settings):

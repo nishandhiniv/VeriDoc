@@ -188,3 +188,9 @@ table.report td:nth-child(2) { width: 22%; }
 .choice input { width: 18px; height: 18px; accent-color: var(--brand); }
 .history { padding-left: 20px; }
 .label { font-weight: 600; margin-bottom: 4px; text-align: left; }
+
+/* Accuracy */
+.measured { font-weight: 600; }
+.gate { padding: 12px 16px; font-weight: 700; border: 2px solid; max-width: none; }
+.gate--ok { color: var(--ok); background: var(--ok-bg); }
+.gate--bad { color: var(--bad); background: var(--bad-bg); }

@@ -151,6 +151,23 @@ def decide(reference):
 @bp.route("/accuracy")
 @admin_required
 def accuracy():
+    from .evaluation_runner import is_running
     from .models import EvaluationRun
-    run = EvaluationRun.query.order_by(EvaluationRun.created_at.desc()).first()
-    return render_template("staff/accuracy.html", run=run, report=run.report if run else None)
+    latest = EvaluationRun.query.filter_by(status="done").order_by(EvaluationRun.id.desc()).first()
+    last = EvaluationRun.query.order_by(EvaluationRun.id.desc()).first()
+    return render_template("staff/accuracy.html", run=latest, report=latest.report if latest else None,
+                           running=is_running(), last_failed=last is not None and last.status == "failed")
+
+
+@bp.route("/accuracy/run", methods=["POST"])
+@admin_required
+def run_accuracy():
+    from flask import current_app
+    from .evaluation_runner import start_evaluation
+    run = start_evaluation(current_app._get_current_object(), current_user.email,
+                           background=not current_app.config.get("TESTING"))
+    if run is None:
+        flash("An evaluation is already running.", "info")
+    elif run.status == "running":
+        flash("Evaluation started. It runs in the background; this page refreshes until it finishes.", "info")
+    return redirect(url_for("staff.accuracy"))
